@@ -422,8 +422,8 @@ class ARMOS_ES:
         for s in range(n_batches):
             start = s*n_batch
             end = min((s+1)*n_batch, n_days)
-            E_1 = tf.clip_by_value(tf.linalg.norm(samples[:,start:end,:] - obs[start:end,:], axis=-1), 1e-07, 1e10)
-            E_2 = tf.clip_by_value(tf.linalg.norm(tf.expand_dims(samples[:,start:end,:], 0) - tf.expand_dims(samples[:,start:end,:], 1), axis=-1), 1e-07, 1e10)
+            E_1 = tf.clip_by_value(tf.linalg.norm(samples[:,start:end,:] - obs[start:end,:], axis=-1), 1e-07, 1e10) # Clip the norms for numerical stability
+            E_2 = tf.clip_by_value(tf.linalg.norm(tf.expand_dims(samples[:,start:end,:], 0) - tf.expand_dims(samples[:,start:end,:], 1), axis=-1), 1e-07, 1e10) # Clip the norms for numerical stability
             ES = ES + tf.reduce_sum(tf.reduce_mean(E_1, axis=0) - 0.5 * tf.reduce_mean(E_2, axis=(0,1)), axis=0)
 
         return ES/n_days

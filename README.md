@@ -2,6 +2,7 @@
 
 This repository contains a selected subset of the code developed for the experiments reported in the accompanying paper *Autoregressive Model Output Statistics*. The included scripts cover data preprocessing and visualization, the main model implementation, and the experimental setup. Some additional code used for generating result figures is not included. The repository is intended to document the implementation and support understanding and use of the model. The original experimental environment is no longer available, and compatibility with current Python and TensorFlow/Keras versions has not been verified.
 
+Much of the code is based on https://github.com/DTolomei/WindSpeedPost-LstmAr.
 
 ## Repository structure
 
