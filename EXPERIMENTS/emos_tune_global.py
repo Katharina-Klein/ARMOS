@@ -96,12 +96,14 @@ for i, lr in enumerate([0.001, 0.005, 0.01, 0.05, 0.1]):
 
     for j, cv in enumerate([None, 0.5, 1.0, 1.5]):
 
+        # Initialize the EMOS model and define the optimizer.
         emos   = EMOS(num_var, T)
         emos.opt = tf.keras.optimizers.Adam(learning_rate=lr, clipvalue=cv)
 
         cv_loss = []
         cv_val_loss = []
 
+        # Train the EMOS model and store the training and validation losses for each logging step.
         for k in tqdm(range(log_timesteps)):
             loss = emos.fit(var, S2, obs, steps=log_step)
             cv_loss.append(loss[len(loss)-1])

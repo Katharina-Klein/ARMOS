@@ -8,10 +8,12 @@ from ARMOS.armos_model import ARMOS_MSE as ARMOS
 from RESULTS.scores import log_score_armos
 from tqdm import tqdm
 
+
+# Workaround for Tensorflow and Keras compatibility issue
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 
-
+# Data and result folders
 nobackup    = 'Data/'
 train_data_folder = nobackup + 'train_data/norm_train_data/'
 test_data_folder = nobackup + 'test_data/norm_test_data/'
@@ -19,19 +21,21 @@ test_data_folder = nobackup + 'test_data/norm_test_data/'
 result_folder = 'Results/Validation/ArmosMSE/'
 
 
+# Load station information
 with open('Data/st-info.pkl', 'rb') as f:
     info = pkl.load(f)
 
 
+# Define variables and stations to use
 var_list = ['PRESS', 'KINETIC', 'HUMID', 'GEOPOT']
 omit = ['229', '285', '323']
 sts  = [st for st in info.keys() if st not in omit]
 
 
-
+# Define fixed parameters for training
 T = 49
 num_var = 5
-gridsize = 9
+gridsize = 9 # Optimal grid size determined through grid size selection
 reduce_grid = True
 timesteps = 4000
 log_timesteps = 20
@@ -40,10 +44,12 @@ log_step = 200
 
 
 
-
+# If true, then model will be trained on the training set and evaluated on the validation set.
+# True for hyperparameter tuning.
 validation = True
 
 
+# Load training and validation/test data
 if validation:
 
     val_files  = [train_data_folder + file for file in os.listdir(train_data_folder) if (('20151' in file or '20160' in file) and ('pkl' in file))]
@@ -79,7 +85,7 @@ else:
 
 
 
-
+# Train and evaluate the model for different values of p
 for p in [1, 2, 3, 4]:
 
     fitting_loss = []
@@ -92,6 +98,7 @@ for p in [1, 2, 3, 4]:
 
         for j, cv in enumerate([None, 0.5, 1.0, 1.5]):
 
+            # Initialize the ARMOS model and define the optimizer.
             armos   = ARMOS(num_var, p, T)
             armos.opt = tf.keras.optimizers.Adam(learning_rate=lr, clipvalue=cv)
 
@@ -100,6 +107,7 @@ for p in [1, 2, 3, 4]:
             cv_ls = []
             cv_val_ls = []
 
+            # Train the ARMOS model and store the training and validation losses for each logging step.
             for k in tqdm(range(log_timesteps)):
                 loss = armos.fit(var, S2, obs, steps=log_step)
                 cv_loss.append(loss[len(loss)-1])

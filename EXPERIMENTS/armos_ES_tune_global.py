@@ -8,11 +8,12 @@ from ARMOS.armos_model import ARMOS_ES as ARMOS
 from RESULTS.scores import log_score_armos
 from tqdm import tqdm
 
+
+# Workaround for Tensorflow and Keras compatibility issue
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 
-
-
+# Data and result folders
 nobackup    = 'Data/'
 train_data_folder = nobackup + 'train_data/norm_train_data/'
 test_data_folder = nobackup + 'test_data/norm_test_data/'
@@ -20,32 +21,36 @@ test_data_folder = nobackup + 'test_data/norm_test_data/'
 result_folder = 'Results/Validation/ArmosES/'
 
 
+# Load station information
 with open('Data/st-info.pkl', 'rb') as f:
     info = pkl.load(f)
 
 
-
+# Define variables and stations to use
 var_list = ['PRESS', 'KINETIC', 'HUMID', 'GEOPOT']
 omit = ['229', '285', '323']
 sts  = [st for st in info.keys() if st not in omit]
 
 
-
+# Define fixed parameters for training
 T = 49
 num_var = 5
-gridsize = 9
+gridsize = 9 # Optimal grid size determined through grid size selection
 reduce_grid = True
 timesteps = 4000
 log_timesteps = 20
 log_step = 200
 
 
-p=1
+p=1 # Parameter for the ARMOS(p) model, equivalent to the number of previous lead times used to correct the current lead time
 
 
+# If true, then model will be trained on the training set and evaluated on the validation set.
+# True for hyperparameter tuning.
 validation = True
 
 
+# Load training and validation/test data
 if validation:
 
     val_files  = [train_data_folder + file for file in os.listdir(train_data_folder) if (('20151' in file or '20160' in file) and ('pkl' in file))]
@@ -88,12 +93,15 @@ log_score_fitting = []
 labels = []
 
 
+# Train and evaluate the model for all combinations of learning rates, gradient clipping values, and weight parameter alpha.
+# Hyperparameters for final model training will be selected through visual inspection of the training and validation losses.
 for i, lr in enumerate([0.001, 0.005, 0.01, 0.05, 0.1]):
 
     for j, cv in enumerate([None, 0.5, 1.0, 1.5]):
 
         for s, alpha in enumerate([0, 0.5, 1, 1.5]):
-            
+
+            # Initialize the ARMOS model and define the optimizer.
             armos   = ARMOS(num_var, p, T, alpha=alpha, n_samples=20)
             armos.opt = tf.keras.optimizers.Adam(learning_rate=lr, clipvalue=cv)
 
@@ -105,6 +113,7 @@ for i, lr in enumerate([0.001, 0.005, 0.01, 0.05, 0.1]):
 
             try:
 
+                # Train the ARMOS model and store the training and validation losses for each logging step.
                 for k in tqdm(range(log_timesteps)):
                     loss = armos.fit(var, S2, obs, steps=log_step)
                     cv_loss.append(loss[len(loss)-1])
@@ -134,6 +143,7 @@ for i, lr in enumerate([0.001, 0.005, 0.01, 0.05, 0.1]):
                 with open(result_folder + 'GlobalArmos'+ str(p) + '_losses.pkl', 'wb') as f:
                     pkl.dump(armos_losses,f)
 
+            # Error handling for cases where the model fails to train due to numerical instability or other issues.
             except:
 
                 print('Error for lr = ' + str(lr) + ', cv = ' + str(cv))
