@@ -1,3 +1,5 @@
+##### This code was almost entirely written by Daniel
+
 import os
 import pygrib
 import numpy as np

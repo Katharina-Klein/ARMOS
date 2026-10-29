@@ -45,7 +45,7 @@ wind10_obs = np.zeros([len_files,len_stats,T])
 wind10_fct = np.zeros([len_files,len_stats,T])
 
 
-
+# Loop over Pickle files and store relevant data in the corresponding arrays
 for i, file in enumerate(files):
     with open(file, 'rb') as f:
         data = pkl.load(f)
@@ -68,7 +68,7 @@ for i, file in enumerate(files):
     
 
 
-
+# Calculate the forecast error (bias) and its mean and standard deviation over all stations and files, ignoring instances with missing observations
 wind10_error = wind10_fct - wind10_obs
 
 ind = np.where(wind10_obs > -1, True, False)
@@ -81,6 +81,7 @@ wind10_error_all = np.reshape(wind10_error, (len_files*len_stats,T))[np.all(np.r
 confint = [mean-std, mean+std]
 
 
+# Plot the mean and standard deviation of the bias over all stations and files
 fig = plt.figure(figsize=(10, 10))
 plt.plot(np.arange(T),mean,label='Mean')
 plt.fill_between(np.arange(T), confint[0], confint[1], alpha=0.1)
@@ -95,7 +96,7 @@ plt.savefig('Pictures/Bias/windspeed_error_global.png')
 plt.show()
 
 
-'''
+''' Uncomment this section to plot the mean and standard deviation of the bias for each station in stations_individual separately
 for station in stations_individual:
 
     st_index = stations_all.index(station)

@@ -11,7 +11,7 @@ import json
 from tqdm import tqdm
 
 
-# Folder with stored training data
+# Data folders
 nobackup    = 'Data/'
 data_folder = nobackup + 'train_data/'                                             # training data 2015 - 2017
 norm_data_folder = data_folder + 'norm_train_data/'                                     # training data 2015 - 2017
@@ -29,7 +29,7 @@ with open('Data/st-info.pkl', 'rb') as file:
     st_info = pkl.load(file)
 
 
-# Select stations and variables
+# Define variables and stations to use
 omit = ['229', '285', '323']
 var_list = ['WIND850', 'WIND925', 'PRESS', 'KINETIC', 'HUMID', 'GEOPOT']
 
@@ -49,7 +49,7 @@ for i, file in enumerate(data_files):
     grid[i] = data.pop('GRID')
 
 
-
+##### Normalize training data and save mean and standard deviation values for each variable and the wind speed grid
 
 mean_grid, std_grid = np.mean(grid), np.std(grid)
 mean, std = tf.math.reduce_mean(variables, axis=(0,1)), tf.math.reduce_std(variables, axis=(0,1))
@@ -68,7 +68,7 @@ with open(data_folder + 'normalization_values_new.json', 'w') as f:
 
 
 
-
+# Normalize training data and save to new folder
 for file in tqdm(files):
     with open(data_folder + file, 'rb') as f:
         data = pkl.load(f)
@@ -98,6 +98,7 @@ norm_data_folder = data_folder + 'norm_test_data/'                              
 files = [file for file in os.listdir(data_folder) if '.pkl' in file]
 
 
+# Normalize test data and save to new folder
 for file in tqdm(files):
     with open(data_folder + file, 'rb') as f:
         data = pkl.load(f)
