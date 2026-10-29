@@ -1,3 +1,5 @@
+##### This code was almost entirely written by Daniel
+
 import os
 import pickle as pkl
 import pandas as pd

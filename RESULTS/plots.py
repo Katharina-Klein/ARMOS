@@ -2,11 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-T = 49
-formats = ['.-b', '*-r', '+-k', 'v-g', 's-c' 'd-y']
+# Constants
+T = 49 # Total number of lead times (0-48 hours)
+formats = ['.-b', '*-r', '+-k', 'v-g', 's-c' 'd-y'] # Line formats for plotting different models or methods
 
 
 def plot_reliability(leadtimes, thresholds, observations, samples, labels):
+    """Generate reliability diagrams for the forecast distribution based on samples and observations.
+    
+    Args:
+        leadtimes: List of lead times for which to generate reliability diagrams.
+        thresholds: List of thresholds for which to generate reliability diagrams.
+        observations: Tensor containing the observations.
+        samples: List of Numpy arrays containing the forecast samples for each model or method.
+        labels: List of labels corresponding to each model or method for the legend.
+    """
 
     bins = np.arange(0.0, 1.1, 0.1)
     probs = np.arange(0.05, 1.0, 0.1)
@@ -60,6 +70,16 @@ def plot_reliability(leadtimes, thresholds, observations, samples, labels):
 
 
 def get_climatology(thresholds, leadtimes, obs):
+    """Determine the climatology values for each lead time and threshold based on the observations.
+    
+    Args:
+        leadtimes: List of lead times for which to determine the climatology.
+        thresholds: List of thresholds for which to determine the climatology.
+        obs: Tensor containing the observations.
+
+    Returns:
+        A Numpy array containing the climatology values for each lead time and threshold.
+    """
 
     climatology = np.zeros((len(leadtimes), len(thresholds)))
 
@@ -71,6 +91,15 @@ def get_climatology(thresholds, leadtimes, obs):
 
 
 def plot_bss(leadtimes, climatology, observations, samples, labels):
+    """Generate a plot displaying the Brier Skill Score (BSS) for the forecast distribution based on samples and observations.
+    
+    Args:
+        leadtimes: List of lead times for which to generate reliability diagrams.
+        climatology: Numpy array containing the climatology values for each lead time and threshold.
+        observations: Tensor containing the observations.
+        samples: List of Numpy arrays containing the forecast samples for each model or method.
+        labels: List of labels corresponding to each model or method for the legend.
+    """
 
     thresh = np.arange(1.0, 21.0, 1.0)
 
@@ -108,21 +137,19 @@ def plot_bss(leadtimes, climatology, observations, samples, labels):
 
 
 
-def plot_hist(leadtime, samples, bins, title=''):
-    plt.figure()
-    plt.hist(samples, bins=bins, color='skyblue', edgecolor='black', density=True)
-
-    plt.xlabel('Values')
-    plt.ylabel('Frequency')
-    if title == '':
-        plt.title('Leadtime ' + str(leadtime))
-    else:
-        plt.title(title)
-
-    plt.show()
-
-
 def plot_fitting(timesteps, log_step, values, labels, title, formats=formats, ylabel='Score'):
+    """Generate a plot of the fitting loss over the minimization steps for different models or methods.
+    
+    Args:
+        timesteps: Integer specifying the total number of minimization steps.
+        log_step: Integer specifying the step size for logging the loss values.
+        values: List of arrays containing the loss values for each model or method.
+        labels: List of labels corresponding to each model or method for the legend.
+        title: Title for the plot.
+        formats: List of formats for the plot lines. Default is ['.-b', '*-r', '+-k', 'v-g', 's-c' 'd-y'].
+        ylabel: Label for the y-axis. Default is 'Score'.
+    """
+
     plt.figure()
     for i in range(len(values)):
         plt.plot(np.arange(0, timesteps, log_step), values[i], formats[i], label=labels[i])
@@ -134,20 +161,18 @@ def plot_fitting(timesteps, log_step, values, labels, title, formats=formats, yl
     plt.legend()
 
 
-def plot_leadtimes(values, labels, title, formats=formats):
-    plt.figure()
-    for i in range(len(values)):
-        plt.plot(np.arange(0,T), values[i], formats[i], label=labels[i])
-    plt.title(title)
-    plt.xlabel('Lead time')
-    plt.xticks([0, 6, 12, 18, 24, 30, 36, 42, 48])
-    plt.xlim([0, 48])
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
 
 
 def plot_samples(samples, obs, fcst,  title='Samples'):
+    """Generate a plot displaying samples from the multivariate forecast distribution along with the observations and NWP forecast.
+    
+    Args:
+        samples: Numpy array containing the forecast samples.
+        obs: Numpy array containing the observations.
+        fcst: Numpy array containing the NWP forecast.
+        title: Title for the plot. Default is 'Samples'.
+    """
+
     plt.figure()
     for i in range(len(samples)):
         plt.plot(np.arange(0,T),samples[i])
